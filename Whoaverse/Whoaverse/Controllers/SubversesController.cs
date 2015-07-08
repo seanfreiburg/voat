@@ -440,6 +440,13 @@ namespace Voat.Controllers
                 // check if user wants to see NSFW content by reading user preference
                 if (User.Identity.IsAuthenticated)
                 {
+                    if (Utils.User.AdultContentEnabled(User.Identity.Name) && Utils.User.OnlyAdultContentEnabled(User.Identity.Name))
+                    {
+                        // return only nsfw submissions
+                        PaginatedList<Message> paginatedNsfwSubmissions = new PaginatedList<Message>(NsfwSubmissionsFromAllSubversesByRank(), page ?? 0, pageSize);
+                        return View(paginatedNsfwSubmissions);
+                    }
+
                     if (Utils.User.AdultContentEnabled(User.Identity.Name))
                     {
                         var paginatedSubmissionsFromAllSubverses = new PaginatedList<Message>(SubmissionsFromAllSubversesByRank(), page ?? 0, pageSize);
@@ -684,8 +691,17 @@ namespace Voat.Controllers
             {
                 IQueryable<Subverse> subverse;
 
+                // fetch a random subverse that is nsfw
+                if (Utils.User.AdultContentEnabled(User.Identity.Name) && Utils.User.OnlyAdultContentEnabled(User.Identity.Name))
+                {
+                    subverse = from subverses in
+                                   _db.Subverses
+                                       .Where(s => s.subscribers > 10 && !s.name.Equals("all", StringComparison.OrdinalIgnoreCase) && s.last_submission_received != null
+                                       && !(from ubs in _db.UserBlockedSubverses where ubs.SubverseName.Equals(s.name) select ubs.Username).Contains(User.Identity.Name) && s.rated_adult && !s.admin_disabled.Value)
+                               select subverses;
+                }
                 // fetch a random subverse with minimum number of subscribers where last subverse activity was evident
-                if (Utils.User.AdultContentEnabled(User.Identity.Name))
+                else if (Utils.User.AdultContentEnabled(User.Identity.Name))
                 {
                     subverse = from subverses in _db.Subverses
                               .Where(s => s.subscribers > 10 && !s.name.Equals("all", StringComparison.OrdinalIgnoreCase) && s.last_submission_received != null
@@ -1747,6 +1763,63 @@ namespace Voat.Controllers
                                                                                 select message).OrderByDescending(s => s.Views).DistinctBy(m => m.Subverse).Take(5).AsQueryable().AsNoTracking();
 
             return sfwSubmissionsFromAllSubversesByViews24Hours;
+        }
+        #endregion
+
+        #region nsfw submissions from all subverses
+        private IQueryable<Message> NsfwSubmissionsFromAllSubversesByDate()
+        {
+            IQueryable<Message> nsfwSubmissionsFromAllSubversesByDate = (from message in _db.Messages
+                                                                        join subverse in _db.Subverses on message.Subverse equals subverse.name
+                                                                        where message.Name != "deleted" && subverse.private_subverse != true && subverse.forced_private != true && subverse.rated_adult && subverse.minimumdownvoteccp == 0
+                                                                        where !(from bu in _db.Bannedusers select bu.Username).Contains(message.Name)
+                                                                        where !subverse.admin_disabled.Value
+                                                                        where !(from ubs in _db.UserBlockedSubverses where ubs.SubverseName.Equals(subverse.name) select ubs.Username).Contains(User.Identity.Name)
+                                                                        select message
+                                                                        ).OrderByDescending(s => s.Date).AsNoTracking();
+
+            return nsfwSubmissionsFromAllSubversesByDate;
+        }
+
+        private IQueryable<Message> NsfwSubmissionsFromAllSubversesByRank()
+        {
+            IQueryable<Message> nsfwSubmissionsFromAllSubversesByRank = (from message in _db.Messages
+                                                                        join subverse in _db.Subverses on message.Subverse equals subverse.name
+                                                                        where message.Name != "deleted" && subverse.private_subverse != true && subverse.forced_private != true && subverse.forced_private != true && subverse.rated_adult && subverse.minimumdownvoteccp == 0 && message.Rank > 0.00009
+                                                                        where !(from bu in _db.Bannedusers select bu.Username).Contains(message.Name)
+                                                                        where !subverse.admin_disabled.Value
+                                                                        where !(from ubs in _db.UserBlockedSubverses where ubs.SubverseName.Equals(subverse.name) select ubs.Username).Contains(User.Identity.Name)
+                                                                        select message).OrderByDescending(s => s.Rank).ThenByDescending(s => s.Date).AsNoTracking();
+
+            return nsfwSubmissionsFromAllSubversesByRank;
+        }
+
+        private IQueryable<Message> NsfwSubmissionsFromAllSubversesByTop(DateTime startDate)
+        {
+            IQueryable<Message> nsfwSubmissionsFromAllSubversesByTop = (from message in _db.Messages
+                                                                       join subverse in _db.Subverses on message.Subverse equals subverse.name
+                                                                       where message.Name != "deleted" && subverse.private_subverse != true && subverse.rated_adult && subverse.minimumdownvoteccp == 0
+                                                                       where !(from bu in _db.Bannedusers select bu.Username).Contains(message.Name)
+                                                                       where !subverse.admin_disabled.Value
+                                                                       where !(from ubs in _db.UserBlockedSubverses where ubs.SubverseName.Equals(subverse.name) select ubs.Username).Contains(User.Identity.Name)
+                                                                       select message).OrderByDescending(s => s.Likes - s.Dislikes).Where(s => s.Date >= startDate && s.Date <= DateTime.Now)
+                                                                       .AsNoTracking();
+
+            return nsfwSubmissionsFromAllSubversesByTop;
+        }
+
+        private IQueryable<Message> NsfwSubmissionsFromAllSubversesByViews24Hours()
+        {
+            var startDate = DateTime.Now.Add(new TimeSpan(0, -24, 0, 0, 0));
+            IQueryable<Message> nsfwSubmissionsFromAllSubversesByViews24Hours = (from message in _db.Messages
+                                                                                join subverse in _db.Subverses on message.Subverse equals subverse.name
+                                                                                where message.Name != "deleted" && subverse.private_subverse != true && subverse.forced_private != true && subverse.rated_adult && message.Date >= startDate && message.Date <= DateTime.Now
+                                                                                where !(from bu in _db.Bannedusers select bu.Username).Contains(message.Name)
+                                                                                where !subverse.admin_disabled.Value
+                                                                                where !(from ubs in _db.UserBlockedSubverses where ubs.SubverseName.Equals(subverse.name) select ubs.Username).Contains(User.Identity.Name)
+                                                                                select message).OrderByDescending(s => s.Views).DistinctBy(m => m.Subverse).Take(5).AsQueryable().AsNoTracking();
+
+            return nsfwSubmissionsFromAllSubversesByViews24Hours;
         }
         #endregion
 

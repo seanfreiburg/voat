@@ -564,6 +564,7 @@ namespace Voat.Controllers
                             Night_mode = userPreferences.Night_mode,
                             OpenLinksInNewTab = userPreferences.Clicking_mode,
                             Enable_adult_content = userPreferences.Enable_adult_content,
+                            Enable_only_adult_content = userPreferences.Enable_only_adult_content,
                             Public_subscriptions = userPreferences.Public_subscriptions,
                             Topmenu_from_subscriptions = userPreferences.Topmenu_from_subscriptions
                         };
@@ -588,7 +589,7 @@ namespace Voat.Controllers
         [HttpPost]
         [PreventSpam(DelayRequest = 15, ErrorMessage = "Sorry, you are doing that too fast. Please try again later.")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> UserPreferences([Bind(Include = "Disable_custom_css, Night_mode, OpenLinksInNewTab, Enable_adult_content, Public_subscriptions, Topmenu_from_subscriptions, Shortbio, Avatar")] UserPreferencesViewModel model)
+        public async Task<ActionResult> UserPreferences([Bind(Include = "Disable_custom_css, Night_mode, OpenLinksInNewTab, Enable_adult_content, Enable_only_adult_content, Public_subscriptions, Topmenu_from_subscriptions, Shortbio, Avatar")] UserPreferencesViewModel model)
         {
             // save changes
             using (var db = new whoaverseEntities())
@@ -602,6 +603,7 @@ namespace Voat.Controllers
                     userPreferences.Night_mode = model.Night_mode;
                     userPreferences.Clicking_mode = model.OpenLinksInNewTab;
                     userPreferences.Enable_adult_content = model.Enable_adult_content;
+                    userPreferences.Enable_only_adult_content = model.Enable_only_adult_content;
                     userPreferences.Public_subscriptions = model.Public_subscriptions;
                     userPreferences.Topmenu_from_subscriptions = model.Topmenu_from_subscriptions;
 
@@ -618,6 +620,7 @@ namespace Voat.Controllers
                         Night_mode = model.Night_mode,
                         Clicking_mode = model.OpenLinksInNewTab,
                         Enable_adult_content = model.Enable_adult_content,
+                        Enable_only_adult_content = model.Enable_only_adult_content,
                         Public_subscriptions = model.Public_subscriptions,
                         Topmenu_from_subscriptions = model.Topmenu_from_subscriptions,
                         Username = User.Identity.Name
@@ -662,6 +665,7 @@ namespace Voat.Controllers
                         Night_mode = true,
                         Clicking_mode = false,
                         Enable_adult_content = false,
+                        Enable_only_adult_content = false,
                         Public_subscriptions = false,
                         Topmenu_from_subscriptions = false,
                         Username = User.Identity.Name

@@ -335,6 +335,7 @@
           <Property Name="Language" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="Clicking_mode" Type="bit" Nullable="false" />
           <Property Name="Enable_adult_content" Type="bit" Nullable="false" />
+          <Property Name="Enable_only_adult_content" Type="bit" Nullable="false" />
           <Property Name="Public_votes" Type="bit" Nullable="false" />
           <Property Name="Public_subscriptions" Type="bit" Nullable="false" />
           <Property Name="Topmenu_from_subscriptions" Type="bit" Nullable="false" />
@@ -1278,6 +1279,7 @@
           <Property Name="Language" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" DefaultValue="en" />
           <Property Name="Clicking_mode" Type="Boolean" Nullable="false" DefaultValue="False" />
           <Property Name="Enable_adult_content" Type="Boolean" Nullable="false" DefaultValue="False" />
+          <Property Name="Enable_only_adult_content" Type="Boolean" Nullable="false" DefaultValue="False" />
           <Property Name="Public_votes" Type="Boolean" Nullable="false" DefaultValue="False" />
           <Property Name="Public_subscriptions" Type="Boolean" Nullable="false" />
           <Property Name="Topmenu_from_subscriptions" Type="Boolean" Nullable="false" />
@@ -1913,6 +1915,7 @@
                 <ScalarProperty Name="Public_subscriptions" ColumnName="Public_subscriptions" />
                 <ScalarProperty Name="Public_votes" ColumnName="Public_votes" />
                 <ScalarProperty Name="Enable_adult_content" ColumnName="Enable_adult_content" />
+                <ScalarProperty Name="Enable_only_adult_content" ColumnName="Enable_only_adult_content" />
                 <ScalarProperty Name="Clicking_mode" ColumnName="Clicking_mode" />
                 <ScalarProperty Name="Language" ColumnName="Language" />
                 <ScalarProperty Name="Night_mode" ColumnName="Night_mode" />

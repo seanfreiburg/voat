@@ -22,6 +22,7 @@ namespace Voat.Models
             this.Clicking_mode = false;
             this.Enable_adult_content = false;
             this.Public_votes = false;
+            this.Enable_only_adult_content = false;
         }
     
         public string Username { get; set; }
@@ -35,5 +36,6 @@ namespace Voat.Models
         public bool Topmenu_from_subscriptions { get; set; }
         public string Shortbio { get; set; }
         public string Avatar { get; set; }
+        public bool Enable_only_adult_content { get; set; }
     }
 }
