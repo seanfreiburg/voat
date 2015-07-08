@@ -412,6 +412,16 @@ namespace Voat.Utils
             }
         }
 
+        // check if a given user wants to only see NSFW (adult) content
+        public static bool OnlyAdultContentEnabled(string userName)
+        {
+            using (var db = new whoaverseEntities())
+            {
+                var result = db.Userpreferences.Find(userName);
+                return result != null && result.Enable_only_adult_content;
+            }
+        }
+
         // check if a given user wants to open links in new window
         public static bool LinksInNewWindow(string userName)
         {

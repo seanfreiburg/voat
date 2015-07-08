@@ -78,6 +78,9 @@ namespace Voat.Models.ViewModels
         [Display(Name = "Display NSFW content")]
         public bool Enable_adult_content { get; set; }
 
+        [Display(Name = "Display Only NSFW content")]
+        public bool Enable_only_adult_content { get; set; }
+
         [Display(Name = "Publicly display my subscriptions on my profile")]
         public bool Public_subscriptions { get; set; }
 
